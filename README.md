@@ -61,6 +61,19 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md). Conventional commits; generated code s
 
 [MIT](./LICENSE) © 2026 Aliaksandr Tsviatkou
 
+## Honest assessment
+
+> From the v2 self-critical analysis. Scores use **Gap · Value · Moat · Time-to-revenue · Risk** (for Risk, **higher = safer**). Prior art is named deliberately — "no competitor" is almost never true.
+
+**Scores:** Gap 3 · Value 4 · Moat 2 · TTR 2 · Risk 3
+
+- **Prior art / competition.** SAP Cloud ships Dynatrace; OpenTelemetry auto-instrumentation is free and mature. This adds semantic conventions + error analytics on top — a thin, copyable layer.
+- **True differentiator.** SAP-Commerce span semantics + turning the VAL_* taxonomy into live analytics. Needs a UI to be valuable.
+- **Kill criterion.** If Dynatrace dashboards + a few custom spans get teams 80% there for free, willingness to pay collapses.
+- **Verdict.** **Feature, later** — revisit as a commerce-mcp add-on rather than a separate product.
+
+See the full landscape, go-to-market and the **IP / conflict-of-interest** discussion in [sap-commerce-general-ideas-for-startup.md](https://github.com/AlexTsvetkov/sap-commerce-ideas-for-projects/blob/main/ideas-for-startup/sap-commerce-general-ideas-for-startup.md).
+
 ---
 
 *Part of a backend tooling suite for SAP Commerce Cloud. See [`commerce-mcp`](https://github.com/AlexTsvetkov/commerce-mcp) for the AI-native flagship.*
