@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>commerce-otel · SAP Commerce backend tooling</title>
+<meta name="description" content="Business-level distributed tracing and error-taxonomy analytics for SAP Commerce topologies (monolith + BTP microservices + lambdas + eventing)." />
+<style>
+  :root{--bg:#0b1020;--panel:#141b34;--ink:#e8ecf8;--muted:#9aa6c7;--accent:#5b8cff;--accent2:#31d0aa;--line:#26304f;--maxw:960px}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#0b1020,#0d1428 60%,#0b1020);color:var(--ink);line-height:1.6}
+  a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+  header.hero{padding:72px 0 48px;text-align:center;border-bottom:1px solid var(--line)}
+  .badge{display:inline-block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent2);border:1px solid var(--line);border-radius:999px;padding:5px 14px;margin-bottom:20px}
+  h1{font-size:clamp(34px,6vw,56px);margin:.1em 0;background:linear-gradient(90deg,#8fb0ff,#31d0aa);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .tag{font-size:clamp(17px,2.4vw,21px);color:var(--muted);max-width:660px;margin:16px auto 0}
+  .cta{margin-top:32px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+  .btn{background:var(--accent);color:#fff;padding:12px 22px;border-radius:10px;font-weight:600;border:0}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+  section{padding:52px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:28px;margin:0 0 8px} .lead{color:var(--muted);margin:0 0 28px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px}
+  .card h3{margin:0 0 8px;font-size:18px} .card p{margin:0;color:var(--muted);font-size:15px}
+  .k{color:var(--accent2);font-weight:600}
+  pre{background:#0a0f22;border:1px solid var(--line);border-radius:12px;padding:18px;overflow:auto;font-size:13.5px;color:#cdd7f5}
+  table{width:100%;border-collapse:collapse;margin-top:8px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);font-size:15px}
+  th{color:var(--muted);font-weight:600}
+  footer{padding:40px 0;text-align:center;color:var(--muted);font-size:14px}
+  .note{background:rgba(91,140,255,.08);border:1px solid var(--line);border-radius:12px;padding:16px;color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <span class="badge">SAP Commerce · Java 21 · Gradle</span>
+    <h1>commerce-otel</h1>
+    <p class="tag">Business-level distributed tracing and error-taxonomy analytics for SAP Commerce topologies (monolith + BTP microservices + lambdas + eventing).</p>
+    <div class="cta">
+      <a class="btn" href="https://github.com/AlexTsvetkov/commerce-otel">View on GitHub</a>
+      <a class="btn ghost" href="#why">Why it's useful</a>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>The problem</h2>
+    <p class="lead">You can&#x27;t watch one cart flow storefront → OCC → decorator lambda → cart-service rules → pricing → export as a single business narrative. APM shows infra spans, not checkout scenarios. Domain error taxonomies live in code with no analytics.</p>
+    <div class="grid"><div class="card"><h3>Expertise-gated</h3><p>You can&#x27;t watch one cart flow storefront → OCC → decorator lambda → cart-service rules → pricing → export as a single business narrative. AP…</p></div><div class="card"><h3>Costly &amp; slow</h3><p>Manual, error-prone work that scales badly across a large estate.</p></div><div class="card"><h3>Under-tooled</h3><p>The ecosystem lacks modern, opinionated backend tooling for this.</p></div></div>
+  </div>
+</section>
+
+<section id="why">
+  <div class="wrap">
+    <h2>The solution &amp; why it's useful</h2>
+    <p class="lead">An OpenTelemetry-native layer that stitches OCC/OData/NATS/CPI hops into **business transactions**, plus an **error-code catalog &amp; analytics** (&#x27;VAL_0046 buying-restriction fires 4k×/day, 80% on channel 02&#x27;).</p>
+    <div class="grid"><div class="card"><h3>Business spans, not just infra</h3><p>Spans carry domain semantics — scenario, channel, runway, transaction type — so a trace reads as a checkout story.</p></div><div class="card"><h3>Cross-boundary stitching</h3><p>Correlates sync REST and async NATS hops into one transaction via propagated trace context.</p></div><div class="card"><h3>Error economics</h3><p>Turns a de-facto error-code contract into a queryable catalog with live frequency analytics.</p></div><div class="card"><h3>Standards-based</h3><p>Pure OpenTelemetry — export to any backend you already run.</p></div></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Capabilities</h2>
+    <table><tr><th>Capability</th><th>Description</th></tr><tr><td><span class="k">Semantic conventions</span></td><td>A SAP-Commerce span/attribute vocabulary.</td></tr><tr><td><span class="k">Trace stitching</span></td><td>Join NATS-async hops to their originating transaction.</td></tr><tr><td><span class="k">Error catalog</span></td><td>Registry + analytics over domain error codes.</td></tr><tr><td><span class="k">Exporters</span></td><td>OTLP-compatible; plug into your collector.</td></tr></table>
+    <p class="note">Early scaffold: the core abstraction, a starter implementation and tests are real. This is a foundation to build on.</p>
+  </div>
+</section>
+
+<footer><div class="wrap"><p>commerce-otel · MIT License · © 2026 Aliaksandr Tsviatkou<br/>Part of a backend tooling suite for SAP Commerce Cloud.</p></div></footer>
+</body>
+</html>
