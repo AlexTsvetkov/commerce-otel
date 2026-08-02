@@ -2,6 +2,8 @@
 
 **Business-level distributed tracing and error-taxonomy analytics for SAP Commerce topologies (monolith + BTP microservices + lambdas + eventing).**
 
+**🌐 Live site: https://alextsvetkov.github.io/commerce-otel/**
+
 > ⚠️ **Status:** early scaffold. The core abstraction, a starter implementation and tests are real; this is a foundation to build on, not a finished product. See [Roadmap](#roadmap).
 
 **Stack:** Java 21 + Gradle.
