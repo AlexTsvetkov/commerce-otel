@@ -47,6 +47,97 @@ gradle build
 gradle test
 ```
 
+## Usage
+
+Everything below is distilled from the runnable, heavily-commented tutorial at
+`src/main/java/com/sapcommercetools/otel/examples/Example.java`. It injects a
+deterministic clock/id source so the ids and durations are stable — the
+`Output:` blocks are the **real stdout** captured from running it.
+
+### 1. Start a trace with business-attributed child spans
+
+`BusinessSpanFactory` starts a root span and children, and stamps SAP-Commerce
+domain attributes (scenario / channel / runway) so a trace reads as a checkout
+story rather than a pile of infra spans.
+
+```java
+AtomicLong ids = new AtomicLong(1);
+AtomicLong fakeNanos = new AtomicLong(0);
+BusinessSpanFactory factory = new BusinessSpanFactory(
+        ids::getAndIncrement, () -> fakeNanos.getAndAdd(1_000_000L));
+
+Span root = factory.startTrace("checkout-renewal");
+factory.withDomain(root, "renewal", "01", "CR"); // scenario, channel, runway
+
+System.out.println("Created trace id: " + root.traceId());
+System.out.println("Domain attrs on root: " + root.attributes());
+```
+
+```text
+Output:
+Created trace id: 0000000000000001
+Root span id:     0000000000000002  (parent=null)
+Domain attrs on root: {commerce.scenario=renewal, commerce.channel=01, commerce.runway=CR}
+```
+
+### 2. Assemble and print the span tree
+
+A `TraceRecorder` collects spans that arrive in any order and reassembles them
+parent-before-child, and can answer simple analytics questions about a trace.
+
+```java
+TraceRecorder recorder = new TraceRecorder();
+recorder.record(root);
+recorder.record(factory.startChild(root, "validate-cart"));   // + grandchild cpq-pricing-call
+recorder.record(factory.startChild(root, "persist-order"));
+
+List<Span> ordered = recorder.assemble(root.traceId());
+long channel01 = recorder.countByAttribute(root.traceId(), "commerce.channel", "01");
+```
+
+```text
+Output:
+- checkout-renewal   [span=0000000000000002] 7.0 ms {commerce.scenario=renewal, commerce.channel=01, commerce.runway=CR}
+  - validate-cart      [span=0000000000000003] 4.0 ms {commerce.scenario=renewal, commerce.channel=01, commerce.runway=CR}
+    - cpq-pricing-call   [span=0000000000000004] 2.0 ms {commerce.scenario=renewal, commerce.channel=01, commerce.runway=CR}
+  - persist-order      [span=0000000000000005] 3.0 ms {commerce.scenario=renewal, commerce.channel=01, commerce.runway=CR}
+Spans on channel 01: 4 of 4
+```
+
+### 3. Turn the VAL_* taxonomy into analytics with ErrorCatalog
+
+`ErrorCatalog` registers `VAL_*` codes with descriptions, records occurrences as
+they stream in, and ranks them with `topCodes(n)`. Unregistered codes are still
+counted (reported as `(unregistered)`) so nothing is lost.
+
+```java
+ErrorCatalog catalog = new ErrorCatalog()
+        .register("VAL_0046", "Quote total below the channel minimum")
+        .register("VAL_0102", "Renewal end-date precedes start-date")
+        .register("VAL_0210", "Configurable product missing required characteristic");
+// ... record() occurrences: VAL_0046 x5, VAL_0102 x2, VAL_0210 x8, VAL_9999 x1
+for (ErrorCatalog.Entry e : catalog.topCodes(3)) {
+    System.out.printf("  %-9s x%-3d  %s%n", e.code(), e.count(), e.description());
+}
+```
+
+```text
+Output:
+Top 3 error codes by frequency:
+  VAL_0210  x8    Configurable product missing required characteristic
+  VAL_0046  x5    Quote total below the channel minimum
+  VAL_0102  x2    Renewal end-date precedes start-date
+Direct count for VAL_0046: 5
+Description for unregistered VAL_9999: (unregistered)
+```
+
+Gradle is not required — compile and run with the JDK (Java 21):
+
+```bash
+find src/main/java -name '*.java' | xargs javac -d /tmp/ex-otel
+java -cp /tmp/ex-otel com.sapcommercetools.otel.examples.Example
+```
+
 ## Roadmap
 
 - [x] Implement the core capability with real logic + unit tests.

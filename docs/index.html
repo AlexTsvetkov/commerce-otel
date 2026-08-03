@@ -69,6 +69,39 @@
   </div>
 </section>
 
+<section>
+  <div class="wrap">
+    <h2>Usage example</h2>
+    <p class="lead">Distilled from the runnable tutorial <span class="k">examples/Example.java</span>. The <span class="k">Output</span> block is real captured stdout (deterministic ids/durations).</p>
+    <p>Start a business-attributed trace, assemble the span tree, and rank domain error codes:</p>
+    <pre><code>BusinessSpanFactory factory = new BusinessSpanFactory(
+        ids::getAndIncrement, () -&gt; fakeNanos.getAndAdd(1_000_000L));
+
+Span root = factory.startTrace("checkout-renewal");
+factory.withDomain(root, "renewal", "01", "CR"); // scenario, channel, runway
+recorder.record(root);
+recorder.record(factory.startChild(root, "validate-cart"));
+recorder.record(factory.startChild(root, "persist-order"));
+List&lt;Span&gt; ordered = recorder.assemble(root.traceId());
+
+ErrorCatalog catalog = new ErrorCatalog()
+        .register("VAL_0210", "Configurable product missing required characteristic");
+catalog.topCodes(3); // ranked by frequency</code></pre>
+    <pre>Output:
+- checkout-renewal   [span=0000000000000002] 7.0 ms {commerce.scenario=renewal, commerce.channel=01, commerce.runway=CR}
+  - validate-cart      [span=0000000000000003] 4.0 ms {...}
+    - cpq-pricing-call   [span=0000000000000004] 2.0 ms {...}
+  - persist-order      [span=0000000000000005] 3.0 ms {...}
+Spans on channel 01: 4 of 4
+
+Top 3 error codes by frequency:
+  VAL_0210  x8    Configurable product missing required characteristic
+  VAL_0046  x5    Quote total below the channel minimum
+  VAL_0102  x2    Renewal end-date precedes start-date</pre>
+    <p class="note">Run it yourself (JDK 21, no Gradle): <span class="k">find src/main/java -name '*.java' | xargs javac -d /tmp/ex-otel &amp;&amp; java -cp /tmp/ex-otel com.sapcommercetools.otel.examples.Example</span></p>
+  </div>
+</section>
+
 <footer><div class="wrap"><p>commerce-otel · MIT License · © 2026 Aliaksandr Tsviatkou<br/>Part of a backend tooling suite for SAP Commerce Cloud.</p></div></footer>
 </body>
 </html>
